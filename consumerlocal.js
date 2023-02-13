@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+var amqp = require('amqplib/callback_api');
+
+amqp.connect('amqp://localhost', function(error0, connection) {
+    if (error0) {
+        throw error0;
+    }
+    connection.createChannel(function(error1, channel) {
+        if (error1) {
+            throw error1;
+        }
+
+        var queue = 'Log_Login';
+
+        channel.assertQueue(queue, {
+            durable: false
+        });
+
+        console.log("Menunggu Data Masuk Dari Publisher %s. Tekan CTRL + C untuk keluar", queue);
+
+        channel.consume(queue, function(msg) {
+            console.log(" Data Diterima %s", msg.content.toString());
+            channel.ack(msg);
+        }, {
+            noAck: false
+        });
+    });
+}); 
